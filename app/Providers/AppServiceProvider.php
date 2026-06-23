@@ -4,6 +4,11 @@ namespace App\Providers;
 
 use App\Models\Category;
 use App\Models\Tag;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -31,5 +36,18 @@ class AppServiceProvider extends ServiceProvider
             $tags = Tag::all();
             View::share(['tags' => $tags]);
         }
+
+        Event::listen(function (Login $event) {
+            Log::info("Login effettuato da: {$event->user->email} (IP: " . request()->ip() . ")");
+        });
+
+        Event::listen(function (Logout $event) {
+            $email = $event->user?->email ?? 'utente sconosciuto';
+            Log::info("Logout effettuato da: $email (IP: " . request()->ip() . ")");
+        });
+
+        Event::listen(function (Registered $event) {
+            Log::info("Nuova registrazione: {$event->user->email} (IP: " . request()->ip() . ")");
+        });
     }
 }

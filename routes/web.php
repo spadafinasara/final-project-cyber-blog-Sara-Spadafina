@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PublicController;
@@ -7,9 +6,8 @@ use App\Http\Controllers\WriterController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\RevisorController;
 
-
-Route::middleware('block_suspicious_ips')->group(function () {
-    // Public routes
+// Public routes - navigazione leggera
+Route::middleware('throttle:60,1')->group(function () {
     Route::get('/', [PublicController::class, 'homepage'])->name('homepage');
     Route::get('/careers', [PublicController::class, 'careers'])->name('careers');
     Route::post('/careers/submit', [PublicController::class, 'careersSubmit'])->name('careers.submit');
@@ -17,8 +15,13 @@ Route::middleware('block_suspicious_ips')->group(function () {
     Route::get('/articles/show/{article:slug}', [ArticleController::class, 'show'])->name('articles.show');
     Route::get('/articles/category/{category}', [ArticleController::class, 'byCategory'])->name('articles.byCategory');
     Route::get('/articles/user/{user}', [ArticleController::class, 'byUser'])->name('articles.byUser');
+});
+
+// Public routes - ricerca (operazione più costosa, protezione rafforzata)
+Route::middleware('block_suspicious_ips')->group(function () {
     Route::get('/articles/', [ArticleController::class, 'articleSearch'])->name('articles.search');
 });
+
 // Writer routes
 Route::middleware('writer')->group(function(){
     Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create');
@@ -43,7 +46,7 @@ Route::middleware(['admin','admin.local'])->group(function(){
     Route::get('/admin/{user}/set-admin', [AdminController::class, 'setAdmin'])->name('admin.setAdmin');
     Route::get('/admin/{user}/set-revisor', [AdminController::class, 'setRevisor'])->name('admin.setRevisor');
     Route::get('/admin/{user}/set-writer', [AdminController::class, 'setWriter'])->name('admin.setWriter');
-    
+
     Route::put('/admin/edit/tag/{tag}', [AdminController::class, 'editTag'])->name('admin.editTag');
     Route::delete('/admin/delete/tag/{tag}', [AdminController::class, 'deleteTag'])->name('admin.deleteTag');
     Route::put('/admin/edit/category/{category}', [AdminController::class, 'editCategory'])->name('admin.editCategory');
