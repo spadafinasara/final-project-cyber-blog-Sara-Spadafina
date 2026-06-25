@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Auth;
 use GuzzleHttp\Exception\RequestException;
 
 class HttpService
@@ -26,10 +27,17 @@ class HttpService
         if (!in_array($parsedUrl['scheme'], $this->allowedProtocols)) {
             return 'Protocol not allowed';
         }
-       
+
         // Validate domain
         if (!isset($parsedUrl['host']) || !in_array($parsedUrl['host'], $this->allowedDomains)) {
             return 'Domain not allowed';
+        }
+
+        // Validate role: solo un admin può accedere a internal.finance
+        if ($parsedUrl['host'] === 'internal.finance') {
+            if (!Auth::check() || !Auth::user()->is_admin) {
+                return 'Not authorized to access this resource';
+            }
         }
 
         // Aggiungi l'intestazione Referer per le richieste al server locale
