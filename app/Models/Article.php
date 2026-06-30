@@ -47,4 +47,21 @@ class Article extends Model
         $minutesToRead = round($totalWords / 200);
         return intval($minutesToRead);
     }
+
+        public static function sanitizeBody($body)
+            {
+                $allowedTags = '<p><b><i><u><strong><em><a><ul><li><ol><br><h1><h2><h3><h4><blockquote>';
+
+                // Rimuove tutti i tag NON nella lista bianca (es. <script>, <img>, <svg>)
+                $clean = strip_tags($body, $allowedTags);
+
+                // Rimuove attributi pericolosi anche dai tag permessi (onerror, onclick, ecc.)
+                $clean = preg_replace('/\son\w+\s*=\s*"[^"]*"/i', '', $clean);
+                $clean = preg_replace("/\son\w+\s*=\s*'[^']*'/i", '', $clean);
+
+                // Rimuove href/src che iniziano con javascript:
+                $clean = preg_replace('/(href|src)\s*=\s*["\']javascript:[^"\']*["\']/i', '', $clean);
+
+                return $clean;
+            }
 }

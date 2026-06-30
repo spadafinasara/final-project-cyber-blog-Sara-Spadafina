@@ -1,3 +1,7 @@
+@php
+    use App\Models\Article;
+@endphp
+
 <x-layout>
     <div class="container-fluid p-5 bg-secondary-subtle text-center">
         <div class="row justify-content-center">
@@ -25,7 +29,7 @@
                     </div>
                 </div>
                 <hr>
-                <p>{{$article->body}}</p>
+                <p>{!! Article::sanitizeBody($article->body) !!}</p>
                 @if (Auth::user() && Auth::user()->is_revisor && !$article->is_accepted)
                     <div class="container my-5">
                         <div class="row">
